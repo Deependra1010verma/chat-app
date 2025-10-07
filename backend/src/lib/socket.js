@@ -7,9 +7,23 @@ import { socketAuthMiddleware } from "../middleware/socket.auth.middleware.js";
 const app = express();
 const server = http.createServer(app);
 
+// Determine allowed origins for socket connections. In development the
+// frontend runs on a Vite dev server (default port 5173). If ENV.CLIENT_URL
+// is not provided, fall back to common local origins so sockets aren't
+// blocked by CORS during local development.
+const fallbackOrigins = ["http://localhost:5173", "http://localhost:3000"]; // common dev ports
+const allowedOrigins = ENV.CLIENT_URL ? [ENV.CLIENT_URL] : fallbackOrigins;
+
+if (!ENV.CLIENT_URL) {
+  console.warn(
+    "Warning: CLIENT_URL is not set. Falling back to local origins for socket CORS:",
+    allowedOrigins
+  );
+}
+
 const io = new Server(server, {
   cors: {
-    origin: [ENV.CLIENT_URL],
+    origin: allowedOrigins,
     credentials: true,
   },
 });

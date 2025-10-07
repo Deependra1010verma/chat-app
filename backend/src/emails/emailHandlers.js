@@ -2,6 +2,11 @@ import { resendClient, sender } from "../lib/resend.js";
 import { createWelcomeEmailTemplate } from "../emails/emailTemplates.js";
 
 export const sendWelcomeEmail = async (email, name, clientURL) => {
+  if (!resendClient) {
+    console.warn("sendWelcomeEmail: resend client not configured. Skipping email send.");
+    return null;
+  }
+
   const { data, error } = await resendClient.emails.send({
     from: `${sender.name} <${sender.email}>`,
     to: email,
@@ -15,4 +20,5 @@ export const sendWelcomeEmail = async (email, name, clientURL) => {
   }
 
   console.log("Welcome Email sent successfully", data);
+  return data;
 };
